@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  node: circleci/node@5.0.1
+  node: circleci/node@5.1.0
 
 jobs:
   build:
@@ -12,12 +12,25 @@ jobs:
       - node/install-packages
       - run: |
           echo "Installed dependencies"
-
+  build-and-push:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check
+      - docker/build:
+          image: amidewing/education-space
+      - docker/push:
+          image: amidewing/education-space
 
 workflows:
   simple_workflow:
     jobs:
       - build
       - node/test:
+          name: test
           requires:
             - build
+      - build-and-push:
+          requires:
+            - test
