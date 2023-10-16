@@ -29,14 +29,16 @@ jobs:
       - image: cimg/node:16.10
     environment:
       IMAGE_NAME: amidewing/education-space
+      IMAGE_TAG: 1.0.1
     steps:
       - checkout
       - setup_remote_docker
       - docker/check
       - docker/build:
           image: $IMAGE_NAME
+          tag: $IMAGE_TAG
       - snyk/scan:
-          docker-image-name: $IMAGE_NAME
+          docker-image-name: $IMAGE_NAME:$IMAGE_TAG
 
 workflows:
   simple_workflow:
