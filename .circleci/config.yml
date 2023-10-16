@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   node: circleci/node@5.1.0
   docker: circleci/docker@2.4.0
+  snyk: snyk/snyk@2.0.1
 
 jobs:
   build:
@@ -23,6 +24,19 @@ jobs:
           image: amidewing/education-space
       - docker/push:
           image: amidewing/education-space
+  scan:
+    docker:
+      - image: cimg/node:16.10
+    environment:
+      IMAGE_NAME: amidewing/education-space
+    steps:
+      - checkout
+      - setup_remote_docker
+      - docker/check
+      - docker/build:
+          image: $IMAGE_NAME
+      - snyk/scan:
+          docker-image-name: $IMAGE_NAME
 
 workflows:
   simple_workflow:
