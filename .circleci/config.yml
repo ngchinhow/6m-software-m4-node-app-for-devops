@@ -52,5 +52,6 @@ workflows:
           requires:
             - test
       - scan:
-          requires:
-            - build
+          filters:
+            tags:
+              only: /^v.*$/
