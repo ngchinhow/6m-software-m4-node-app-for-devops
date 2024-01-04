@@ -38,18 +38,35 @@ jobs:
       - docker/push:
           image: amidewing/education-space
           tag: v1.0.1
-  deploy:
+  # deploy:
+  #   docker:
+  #     - image: cimg/node:16.10
+  #   steps:
+  #     - setup_remote_docker
+  #     - checkout
+  #     - heroku/install
+  #     - run:
+  #         name: Heroku Container Push
+  #         command: |
+  #             heroku container:login
+  #             heroku container:push web -a chinhow-su-devops
+  #             heroku container:release web -a chinhow-su-devops
+  pull-and-deploy:
     docker:
       - image: cimg/node:16.10
     steps:
       - setup_remote_docker
-      - checkout
       - heroku/install
+      - docker/pull:
+          images: amidewing/education-space:v1.0.1
       - run:
-          name: Heroku Container Push
+          name: Heroku Container Push With Image From Docker Hub
           command: |
               heroku container:login
-              heroku container:push web -a chinhow-su-devops
+              docker tag amidewing/education-space:v1.0.1 registry.heroku.com/chinhow-su-devops/web
+              # format --- docker tag <image name from docker hub> registry.heroku.com/<app-name>/web
+              docker push registry.heroku.com/chinhow-su-devops/web
+              # format --- docker push registry.heroku.com/<app-name>/web
               heroku container:release web -a chinhow-su-devops
 
 workflows:
@@ -62,6 +79,6 @@ workflows:
       - publish:
           requires:
             - test
-      - deploy:
+      - pull-and-deploy:
           requires:
             - publish
