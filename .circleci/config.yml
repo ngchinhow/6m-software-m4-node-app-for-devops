@@ -4,6 +4,7 @@ orbs:
   node: circleci/node@5.0.1
   docker: circleci/docker@2.1.4
   heroku: circleci/heroku@2.0.0
+  snyk: snyk/snyk@1.5.0
 
 jobs:
   build:
@@ -26,6 +27,18 @@ jobs:
       - run: |
           echo "Running tests..."
           npm test
+  scan:
+    docker:
+      - image: cimg/node:16.10
+    environment:
+      IMAGE_NAME: amidewing/education-space
+    steps:
+      - checkout
+      - setup_remote_docker
+      - docker/check
+      - run: docker build -t $IMAGE_NAME .
+      - snyk/scan:
+          docker-image-name: $IMAGE_NAME
   publish:
     executor: docker/docker
     steps:
@@ -76,9 +89,9 @@ workflows:
       - test:
           requires:
             - build
-      - publish:
+      - scan:
           requires:
             - test
-      - pull-and-deploy:
+      - publish:
           requires:
-            - publish
+            - scan
